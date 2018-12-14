@@ -222,9 +222,9 @@ $( ".content a" ).click(function(){
         observaciones = [];
 
         observaciones.push({
-            1 : $( ".observaciones_0" ).val(),
-            2 : $( ".observaciones_1" ).val(),
-            3 : $( ".observaciones_2" ).val()
+            observacion_conocer	: $( ".observaciones_0" ).val(),
+            observacion_hacer	: $( ".observaciones_1" ).val(),
+            observacion_saber	: $( ".observaciones_2" ).val()
         });
 
 
