@@ -66,21 +66,21 @@
                         </tr>
                         <tr>
                             <td colspan = 3>Saber Hacer</td>
-                            <td>2.8 - Bajo</td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][15]?></td>
                         </tr>
                         <tr>
                             <td colspan = 4>+ <?= $materia->observacion_hacer ?></td>
                         </tr>
                         <tr>
                             <td colspan = 3>Saber Ser</td>
-                            <td>2.8 - Bajo</td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][16]?></td>
                         </tr>
                         <tr>
                             <td colspan = 4>+ <?= $materia->observacion_saber ?></td>
                         </tr>
                         <tr>
                             <td colspan = 3>Saber Conocer</td>
-                            <td>2.8 - Bajo</td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][17]?></td>
                         </tr>
                         <tr>
                             <td colspan = 4>+ <?= $materia->observacion_conocer ?></td>
@@ -110,22 +110,15 @@
                         <td>SUP</td>
                     </tr>
 
-                    <?php foreach ($calificaciones AS $key => $calificacion): ?>
+                    <?php $materia = ''?>
+                    <?php foreach ($materia_calificacion AS $key => $calificaciones): ?>
                         <tr>
-                            <td><?= $calificacion['materia'] ?></td>
+                            <td><?= $key ?></td>
                             <td>0</td>
-                            <?php if($calificacion['id_periodo'] == 1) : ?>
+                            <?php foreach ($calificaciones AS $key_c => $calificacion): ?>
                                 <td><?= substr( $calificacion['calificacion'] , 0, 4);?></td>
-                            <?php endif; ?>
-                            <?php if($calificacion['id_periodo'] == 2) : ?>
-                                <td><?= substr( $calificacion['calificacion'] , 0, 4);?></td>
-                            <?php endif; ?>
-                            <?php if($calificacion['id_periodo'] == 3) : ?>
-                                <td><?= substr( $calificacion['calificacion'] , 0, 4);?></td>
-                            <?php endif; ?>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
+                                <td>0</td>
+                            <?php endforeach; ?>
                             <td>0</td>
                             <td>0</td>
                             <td>0</td>
