@@ -629,7 +629,8 @@ class CalificacionesController extends Controller
         foreach ($observaciones as $observacion_data){
             $observacion = ObservacionesCalificaciones::find()->where([
                     'id_estudiante' => $estudiante,
-                    'id_asignatura' => $data[0]['id_asignatura']
+                    'id_asignatura' => $data[0]['id_asignatura'],
+                    'id_periodo' => $data[0]['id_periodo']
                 ]
             )->one();
 
@@ -848,12 +849,12 @@ class CalificacionesController extends Controller
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
                   WHERE estudiantes.id_perfiles_x_personas = $estudiante_id
                   GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno
-                 ORDER BY materia");
+                 ORDER BY indicador_desempeno");
 
             $observacion_calificacion = $connection->createCommand("SELECT 
                   personas.nombres || ' ' || personas.apellidos AS nombre,
                   calificaciones.calificacion AS calificacion,
-                  calificaciones.id_periodo,
+                  calificaciones.id_periodo AS periodo,
                   calificaciones.id_distribuciones_x_indicador_desempeno AS indicador_desempeno,
                   asignaturas.descripcion AS materia
                 FROM (((((((((calificaciones
@@ -866,20 +867,44 @@ class CalificacionesController extends Controller
                   JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
-									WHERE calificaciones.id_distribuciones_x_indicador_desempeno IN(15,16,17) AND estudiantes.id_perfiles_x_personas = $estudiante_id
+									WHERE estudiantes.id_perfiles_x_personas = $estudiante_id
                   GROUP BY materia, nombre, calificaciones.id_periodo,calificaciones.calificacion, indicador_desempeno
-                 ORDER BY materia");
+                 ORDER BY indicador_desempeno");
 
 
             $observaciones_calificaciones = [];
+            $key_periodo_1 = 0;
+            $key_periodo_2 = 0;
+            $materia = '';
             foreach ($observacion_calificacion->queryAll() as $key => $obj_calificacion){
-                $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["indicador_desempeno"]] = $obj_calificacion["calificacion"];
+                if ($materia !== $obj_calificacion["materia"]){
+                    $key_periodo_1 = 0;
+                    $key_periodo_2 = 0;
+                    $materia = $obj_calificacion["materia"];
+                }
+
+                if ($obj_calificacion["periodo"] == 1){
+                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
+                    $key_periodo_1++;
+                }
+                if ($obj_calificacion["periodo"] == 2){
+                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
+                    $key_periodo_2++;
+                }
             }
 
             $calificacion_periodos = [];
+            $calificacion_final = 0;
+            $indicadores = 1;
             foreach ($calificaciones->queryAll() as $key => $calificacion){
-                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $calificacion["calificacion"];
+                $definitiva = $calificacion_final += $calificacion["calificacion"];
+                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva/$indicadores;
+                $indicadores++;
             }
+
+            /*var_dump($calificacion_periodos);
+            var_dump($observaciones_calificaciones);
+            die();*/
 
             /*$calificaciones = Calificaciones::find()->alias('os')
                 ->select([

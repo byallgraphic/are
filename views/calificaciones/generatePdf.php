@@ -57,7 +57,7 @@
                         <?php $nombreM = \app\models\Asignaturas::findOne($materia->id_asignatura); ?>
                         <tr>
                             <td>
-                                <?= $nombreM->descripcion ?>
+                                <?= $nombreM->descripcion.' Periodo '.$materia["id_periodo"] ?>
                                 <br>
                                 Doncente de asignatura: <?= $docente ?>
 
@@ -65,25 +65,25 @@
                             <td>FA: 2 -- IHS: 4 -- 3.0 - Basico</td>
                         </tr>
                         <tr>
+                            <td colspan = 3>Saber Conocer</td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][$materia["id_periodo"]][0]?></td>
+                        </tr>
+                        <tr>
+                            <td colspan = 4>+ <?= $materia->observacion_conocer ?></td>
+                        </tr>
+                        <tr>
                             <td colspan = 3>Saber Hacer</td>
-                            <td><?= $observacion_calificacion[$nombreM->descripcion][15]?></td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][$materia["id_periodo"]][1]?></td>
                         </tr>
                         <tr>
                             <td colspan = 4>+ <?= $materia->observacion_hacer ?></td>
                         </tr>
                         <tr>
                             <td colspan = 3>Saber Ser</td>
-                            <td><?= $observacion_calificacion[$nombreM->descripcion][16]?></td>
+                            <td><?= $observacion_calificacion[$nombreM->descripcion][$materia["id_periodo"]][2]?></td>
                         </tr>
                         <tr>
                             <td colspan = 4>+ <?= $materia->observacion_saber ?></td>
-                        </tr>
-                        <tr>
-                            <td colspan = 3>Saber Conocer</td>
-                            <td><?= $observacion_calificacion[$nombreM->descripcion][17]?></td>
-                        </tr>
-                        <tr>
-                            <td colspan = 4>+ <?= $materia->observacion_conocer ?></td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
