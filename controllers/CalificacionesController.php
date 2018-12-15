@@ -834,7 +834,7 @@ class CalificacionesController extends Controller
                   personas.nombres || ' ' || personas.apellidos AS nombre,
                   avg(\"public\".calificaciones.calificacion) AS calificacion,
                   \"public\".calificaciones.id_periodo,
-                  distribuciones_academicas.id AS indicador_desempeno,
+                  \"public\".calificaciones.id_distribuciones_x_indicador_desempeno AS indicador_desempeno,
                   \"public\".asignaturas.descripcion AS materia
                 FROM (((((((((calificaciones
                   JOIN estudiantes ON ((calificaciones.id_perfiles_x_personas_estudiantes = estudiantes.id_perfiles_x_personas)))
@@ -847,7 +847,7 @@ class CalificacionesController extends Controller
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
                   WHERE estudiantes.id_perfiles_x_personas = $estudiante_id
-                  GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, indicador_desempeno
+                  GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno
                  ORDER BY materia");
 
             $observacion_calificacion = $connection->createCommand("SELECT 
@@ -866,22 +866,14 @@ class CalificacionesController extends Controller
                   JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
-									WHERE  estudiantes.id_perfiles_x_personas = $estudiante_id
+									WHERE calificaciones.id_distribuciones_x_indicador_desempeno IN(15,16,17) AND estudiantes.id_perfiles_x_personas = $estudiante_id
                   GROUP BY materia, nombre, calificaciones.id_periodo,calificaciones.calificacion, indicador_desempeno
                  ORDER BY materia");
 
 
             $observaciones_calificaciones = [];
-            $key = 1;
-            $materiaCambio ='';
-            foreach ($observacion_calificacion->queryAll() as /*$key =>*/ $obj_calificacion){
-                if ($obj_calificacion["materia"] != $materiaCambio){
-                    $materiaCambio = $obj_calificacion["materia"];
-                    $key = 1;
-                }
-
-                $observaciones_calificaciones[$obj_calificacion["materia"]][$key] = $obj_calificacion["calificacion"];
-                $key++;
+            foreach ($observacion_calificacion->queryAll() as $key => $obj_calificacion){
+                $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["indicador_desempeno"]] = $obj_calificacion["calificacion"];
             }
 
             $calificacion_periodos = [];
