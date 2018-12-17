@@ -939,9 +939,11 @@ class CalificacionesController extends Controller
     {
         $id = intval(Yii::$app->request->post("id"));
         $periodo = intval(Yii::$app->request->post("periodo"));
+        $asignatura = intval(Yii::$app->request->post("asignatura"));
         $observacion = ObservacionesCalificaciones::find()
             ->where('id_estudiante=:estudiante', [':estudiante'=>$id])
-            ->andWhere('id_periodo=:periodo', [':periodo'=>$periodo])->one();
+            ->andWhere('id_periodo=:periodo', [':periodo'=>$periodo])
+            ->andWhere('id_asignatura=:asignatura', [':asignatura'=>$asignatura])->one();
         $observaciones = [];
         $observaciones["observacion_conocer"] = $observacion["observacion_conocer"];
         $observaciones["observacion_hacer"] = $observacion["observacion_hacer"];

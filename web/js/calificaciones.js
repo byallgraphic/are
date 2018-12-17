@@ -683,7 +683,8 @@ $("#selPeriodo").change(function(){
 
             dataObservacion = {
                 id : listaEstudiantes[0]['id'],
-                periodo: $( "#selPeriodo" ).val()
+                periodo: $( "#selPeriodo" ).val(),
+                asignatura: $("#selMateria").val()
             };
 
             $.post( "index.php?r=calificaciones/observation-person", dataObservacion, function( data ) {
