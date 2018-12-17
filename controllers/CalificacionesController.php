@@ -902,31 +902,6 @@ class CalificacionesController extends Controller
                 $indicadores++;
             }
 
-            /*var_dump($calificacion_periodos);
-            var_dump($observaciones_calificaciones);
-            die();*/
-
-            /*$calificaciones = Calificaciones::find()->alias('os')
-                ->select([
-                    'calificaciones.calificacion',
-                    'calificaciones.id_periodo',
-                    'calificaciones.fecha_modificacion',
-                    new Expression("personas.nombres || ' ' || personas.apellidos AS nombre"),
-                    'indicador_desempeno.descripcion AS indicador_desempeno',
-                    'asignaturas.descripcion AS materia'
-                ]);
-
-            $calificaciones->innerJoin('estudiantes', 'estudiantes.id_perfiles_x_personas = perfiles_x_personas.id')
-                ->innerJoin('perfiles_x_personas', 'perfiles_x_personas.id_personas = personas.id')
-                ->leftJoin('personas', 'calificaciones.id_distribuciones_x_indicador_desempeno = distribuciones_x_indicador_desempeno.id')
-                ->leftJoin('distribuciones_x_indicador_desempeno', 'distribuciones_x_indicador_desempeno.id_indicador_desempeno = indicador_desempeno.id')
-                ->innerJoin('indicador_desempeno', 'distribuciones_x_indicador_desempeno.id_distribuciones = distribuciones_academicas.id')
-                ->innerJoin('distribuciones_academicas', 'distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id')
-                ->innerJoin('asignaturas_x_niveles_sedes', 'asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id')
-                ->innerJoin('asignaturas', 'observaciones_calificaciones.id_asignatura = asignaturas.id')
-                ->innerJoin('observaciones_calificaciones', 'observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas')
-                ->where(['estudiantes.id' => $estudiante[0]["id"]])->all();*/
-
             Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'C:/xampp/htdocs/are/web/prueba.csv' DELIMITER';' NULL '';")->queryAll();
 
             $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$estudiante[0]["id"]])->all();
@@ -945,9 +920,9 @@ class CalificacionesController extends Controller
 
             $pdf->WriteHTML($contentend);
 
-            $pdf->Output("../web/prueba.pdf", \Mpdf\Output\Destination::FILE);
+            $pdf->Output("../web/".trim($estudiante[0]["nombres"], '-').".pdf", \Mpdf\Output\Destination::FILE);
 
-            exit();
+            return trim($estudiante[0]["nombres"]).".pdf";
         } catch (MpdfException $e) {
             var_dump($e);
             die();
@@ -959,4 +934,22 @@ class CalificacionesController extends Controller
             die();
         }
     }
+
+    public function actionObservationPerson()
+    {
+        $id = intval(Yii::$app->request->post("id"));
+        $periodo = intval(Yii::$app->request->post("periodo"));
+        $observacion = ObservacionesCalificaciones::find()
+            ->where('id_estudiante=:estudiante', [':estudiante'=>$id])
+            ->andWhere('id_periodo=:periodo', [':periodo'=>$periodo])->one();
+        $observaciones = [];
+        $observaciones["observacion_conocer"] = $observacion["observacion_conocer"];
+        $observaciones["observacion_hacer"] = $observacion["observacion_hacer"];
+        $observaciones["observacion_saber"] = $observacion["observacion_saber"];
+
+        return json_encode($observaciones);
+    }
+
+
 }
+

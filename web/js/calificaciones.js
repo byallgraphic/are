@@ -665,10 +665,11 @@ $("#selPeriodo").change(function(){
                 +"</div>"
             "</td>";
 
-            table += "</tr>";
+                table += "</tr>";
+
             //Observaciones
             $.each(titulos[1], function( index, value ) {
-                console.log(titulos[1]);
+                //console.log(titulos[1]);
                 table += "<tr>" +
                     "<td colspan='10'><div class='form-group field-calificacionesbuscar-observacion'>\n" +
                     "<label style='width: 100%;'>\n" +
@@ -677,7 +678,24 @@ $("#selPeriodo").change(function(){
                     "</label>\n" +
                     "</div></td></tr>";
             });
+
+
+
+            dataObservacion = {
+                id : listaEstudiantes[0]['id'],
+                periodo: $( "#selPeriodo" ).val()
+            };
+
+            $.post( "index.php?r=calificaciones/observation-person", dataObservacion, function( data ) {
+                $observacion = $.parseJSON(data);
+                $('.observaciones_0').text($observacion.observacion_conocer);
+                $('.observaciones_1').text($observacion.observacion_hacer);
+                $('.observaciones_2').text($observacion.observacion_saber);
+                //$( "#observaciones_" + index).html( data );
+            });
         }
+
+
 
         table += "</tbody>";
 
@@ -746,8 +764,6 @@ $("#selPeriodo").change(function(){
             return patron.test(tecla_final);
         });
     }
-
-
 
     idDocente =	$("#selDocentes").val();
     idParalelo = $("#selGrupo").val();
@@ -828,10 +844,10 @@ function generatePdf() {
         institucionSede: $("#InstitucionSede").text()
     };
 
-    console.log(data);
+    //console.log(data);
 
     $.post( "index.php?r=calificaciones/generate-pdf", data, function( data ) {
-        window.open('prueba.pdf', 'Download');
+        window.open(data, 'Download');
         //window.location.assign('prueba.pdf');
         $( ".result" ).html( data );
     });

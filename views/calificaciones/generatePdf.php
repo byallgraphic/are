@@ -62,7 +62,7 @@
                                 Doncente de asignatura: <?= $docente ?>
 
                             </td>
-                            <td>FA: 2 -- IHS: 4 -- 3.0 - Basico</td>
+                            <td><!--FA: 2 -- IHS: 4 -- 3.0 - Basico--></td>
                         </tr>
                         <tr>
                             <td colspan = 3>Saber Conocer</td>
