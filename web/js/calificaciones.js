@@ -219,13 +219,25 @@ $( ".content a" ).click(function(){
             });
         });
 
-        observaciones = [];
+        var myObject = {};
 
-        observaciones.push({
-            observacion_conocer	: $( ".observaciones_0" ).val(),
-            observacion_hacer	: $( ".observaciones_1" ).val(),
-            observacion_saber	: $( ".observaciones_2" ).val()
+        $('textarea').each(function(i, v) {
+
+            observaciones = [];
+            id_estudiante = v.className.substr(-1);
+
+            observaciones.push({
+                id_estudiante	: id_estudiante,
+                observacion_conocer	: $( ".observaciones_0_" + id_estudiante ).val(),
+                observacion_hacer	: $( ".observaciones_1_" + id_estudiante ).val(),
+                observacion_saber	: $( ".observaciones_2_" + id_estudiante ).val()
+            });
+
+            myObject[id_estudiante] = observaciones[0];
         });
+
+        console.log(myObject);
+
 
 
         // return;
@@ -233,7 +245,7 @@ $( ".content a" ).click(function(){
             "index.php?r=calificaciones/create",
             {
                 data: data,
-                observacion: observaciones
+                observacion: myObject
             },
             function( data ){
                 try{
@@ -674,7 +686,7 @@ $("#selPeriodo").change(function(){
                     "<td colspan='10'><div class='form-group field-calificacionesbuscar-observacion'>\n" +
                     "<label style='width: 100%;'>\n" +
                     "<span style='text-align: left; display: flex;'>Observacion "+ value["html"] +"</span>\n" +
-                    "<textarea class='form-control observaciones_" + index + "'></textarea>\n" +
+                    "<textarea class='form-control observaciones_" + index + "_" + listaEstudiantes[x].id  + "'></textarea>\n" +
                     "</label>\n" +
                     "</div></td></tr>";
             });
@@ -682,18 +694,24 @@ $("#selPeriodo").change(function(){
 
 
             dataObservacion = {
-                id : listaEstudiantes[0]['id'],
+                id : listaEstudiantes[x]['id'],
                 periodo: $( "#selPeriodo" ).val(),
                 asignatura: $("#selMateria").val()
             };
 
             $.post( "index.php?r=calificaciones/observation-person", dataObservacion, function( data ) {
+                //console.log(data);
                 $observacion = $.parseJSON(data);
-                $('.observaciones_0').text($observacion.observacion_conocer);
-                $('.observaciones_1').text($observacion.observacion_hacer);
-                $('.observaciones_2').text($observacion.observacion_saber);
+                $('.observaciones_0_' + $observacion.id_estudiante).text($observacion.observacion_conocer);
+                $('.observaciones_1_' + $observacion.id_estudiante).text($observacion.observacion_hacer);
+                $('.observaciones_2_' + $observacion.id_estudiante).text($observacion.observacion_saber);
                 //$( "#observaciones_" + index).html( data );
             });
+
+            table += "<tr>" +
+                "<td colspan='10'><div class='form-group field-calificacionesbuscar-observacion'>\n" +
+                "<button type=\"button\" class=\"btn btn-success\" onclick=\"generatePdf("+ listaEstudiantes[x].id +")\">Generar Pdf</button>" +
+                "</div></td></tr>";
         }
 
 
@@ -819,28 +837,18 @@ $("#selPeriodo").change(function(){
         "json");
 });
 
-function generatePdf() {
+function generatePdf(id_estudiante) {
 
     idDocente =	$("#selDocentes").val();
     idParalelo   =	$("#selGrupo").val();
     idAsignaturas = $("#selMateria").val();
 
-    //consulta los estudiantes que tiene ese paralelo
-    $.get( "index.php?r=calificaciones/personas&idParalelo="+idParalelo,
-        function( data )
-        {
-            /**
-             * Lista de estudiantes en json, contiene el id y nombre del estudiante
-             * Se para listar los estudiantes al seleccionar una asignatura
-             */
-            listaEstudiantes = data;
-        },
-        "json");
+    console.log(id_estudiante);
 
     data = {
         docente : idDocente,
         paralelo : idParalelo,
-        estudiante : listaEstudiantes,
+        estudiante : id_estudiante,
         materias : $('#selMateria option').map(function() { return parseInt($(this).val()); }).get(),
         institucionSede: $("#InstitucionSede").text()
     };

@@ -30,6 +30,7 @@ else
 use app\models\Docentes;
 use app\models\ObservacionesCalificaciones;
 use app\models\Paralelos;
+use app\models\PerfilesXPersonas;
 use app\models\Personas;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
@@ -628,7 +629,7 @@ class CalificacionesController extends Controller
 
         foreach ($observaciones as $observacion_data){
             $observacion = ObservacionesCalificaciones::find()->where([
-                    'id_estudiante' => $estudiante,
+                    'id_estudiante' => $observacion_data["id_estudiante"],
                     'id_asignatura' => $data[0]['id_asignatura'],
                     'id_periodo' => $data[0]['id_periodo']
                 ]
@@ -638,7 +639,7 @@ class CalificacionesController extends Controller
                 $observacion = new ObservacionesCalificaciones();
             }
 
-            $observacion->id_estudiante = $estudiante;
+            $observacion->id_estudiante = $observacion_data["id_estudiante"];
             $observacion->id_jornada = $data[0]['id_sede_jornada'];
             $observacion->id_paralelo = $data[0]['id_paralelo'];
             $observacion->id_asignatura = $data[0]['id_asignatura'];
@@ -647,7 +648,9 @@ class CalificacionesController extends Controller
             $observacion->observacion_hacer = $observacion_data['observacion_hacer'];
             $observacion->observacion_saber = $observacion_data['observacion_saber'];
 
-            $observacion->save();
+            if ($observacion->observacion_conocer != '' || $observacion->observacion_hacer != '' || $observacion->observacion_saber){
+                $observacion->save();
+            }
         }
 
         return json_encode( $val );
@@ -787,10 +790,12 @@ class CalificacionesController extends Controller
             $institucion = Yii::$app->request->post("institucionSede");
             $idDocente = Yii::$app->request->post("docente");
             $idParalelo = Yii::$app->request->post("paralelo");
-            $estudiante = Yii::$app->request->post("estudiante");
+            $estudiante_id = json_decode(Yii::$app->request->post("estudiante"));
             $idsAsignaturas = Yii::$app->request->post("materias");
 
-            $estudiante_id = $estudiante[0]["id"];
+            $perfilxpersona = PerfilesXPersonas::findOne($estudiante_id);
+            $estudiante = Personas::findOne($perfilxpersona->id_personas);
+
             $paralelo = Paralelos::findOne($idParalelo);
             $docente = Docentes::findOne($idDocente);
             $docente = Personas::findOne($docente->id_perfiles_x_personas);
@@ -847,7 +852,7 @@ class CalificacionesController extends Controller
                   JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
-                  WHERE estudiantes.id_perfiles_x_personas = $estudiante_id
+                  WHERE estudiantes.id_perfiles_x_personas = $perfilxpersona->id
                   GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno
                  ORDER BY indicador_desempeno");
 
@@ -867,10 +872,9 @@ class CalificacionesController extends Controller
                   JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
-									WHERE estudiantes.id_perfiles_x_personas = $estudiante_id
+									WHERE estudiantes.id_perfiles_x_personas = $perfilxpersona->id
                   GROUP BY materia, nombre, calificaciones.id_periodo,calificaciones.calificacion, indicador_desempeno
                  ORDER BY indicador_desempeno");
-
 
             $observaciones_calificaciones = [];
             $key_periodo_1 = 0;
@@ -902,27 +906,25 @@ class CalificacionesController extends Controller
                 $indicadores++;
             }
 
-            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'C:/xampp/htdocs/are/web/prueba.csv' DELIMITER';' NULL '';")->queryAll();
+            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'C:/xampp/htdocs/are/web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
-            $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$estudiante[0]["id"]])->all();
+            $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
 
             $contentend = $this->renderPartial('generatePdf', [
                 'institucion' => $institucion,
                 'docente' => $docente->nombres." ".$docente->apellidos,
-                'estudiante' => $estudiante[0]["nombres"],
+                'estudiante' => $estudiante->nombres,
                 'paralelo' => $paralelo->descripcion,
                 'asignaturas' => $materiasEstObserv,
                 'materia_calificacion' => $calificacion_periodos,
                 'observacion_calificacion' => $observaciones_calificaciones
             ]);
 
-
-
             $pdf->WriteHTML($contentend);
 
-            $pdf->Output("../web/".trim($estudiante[0]["nombres"], '-').".pdf", \Mpdf\Output\Destination::FILE);
+            $pdf->Output("../web/".trim($estudiante->nombres, '-').".pdf", \Mpdf\Output\Destination::FILE);
 
-            return trim($estudiante[0]["nombres"]).".pdf";
+            return trim($estudiante->nombres).".pdf";
         } catch (MpdfException $e) {
             var_dump($e);
             die();
@@ -945,6 +947,7 @@ class CalificacionesController extends Controller
             ->andWhere('id_periodo=:periodo', [':periodo'=>$periodo])
             ->andWhere('id_asignatura=:asignatura', [':asignatura'=>$asignatura])->one();
         $observaciones = [];
+        $observaciones["id_estudiante"] = $id;
         $observaciones["observacion_conocer"] = $observacion["observacion_conocer"];
         $observaciones["observacion_hacer"] = $observacion["observacion_hacer"];
         $observaciones["observacion_saber"] = $observacion["observacion_saber"];
