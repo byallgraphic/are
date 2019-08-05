@@ -60,9 +60,11 @@ class PerfilesPersonasInstitucionController extends Controller
      */
     public function actionIndex()
     {
+		$idInstitucion 	= $_SESSION['instituciones'][0];
+		
         $searchModel = new PerfilesPersonasInstitucionBuscar();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		$dataProvider ->query->andWhere('estado=1'); 
+		$dataProvider ->query->andWhere("estado=1 and id_institucion = $idInstitucion "); 
 
         return $this->render('index', [
             'searchModel' => $searchModel,

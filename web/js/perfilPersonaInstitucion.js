@@ -52,19 +52,19 @@ $("#selPerfiles").change(function(){
 	$.get( "index.php?r=perfiles-personas-institucion/listar-p&idPerfiles="+idPerfiles, 
 				function( data )
 				{
-					// console.log(data);
 					$('#perfilespersonasinstitucion-id_perfiles_x_persona').find('option:not(:first)').remove();
-					for( i = 0; i< data.length; i++ ){ 
+					for( i = 0; i< data.length; i++ )
+					{ 	
+						$("#perfilespersonasinstitucion-id_perfiles_x_persona")
+						.append('<option value='+data[i].id+'>'+data[i].nombres+'</option>');
 						
-						$("#perfilespersonasinstitucion-id_perfiles_x_persona").append('<option value='+data[i].id+'>'+data[i].nombres+'</option>');
 					}
 					 
-					 // setTimeout(function(){ 
-						if (perfilesPersonasSelected != ""){  
-							$( "#perfilespersonasinstitucion-id_perfiles_x_persona" ).val(perfilesPersonasSelected);
-						 }
-					// }, 2000);
-					 
+					if (perfilesPersonasSelected != "")
+					{  
+						$( "#perfilespersonasinstitucion-id_perfiles_x_persona" ).val(perfilesPersonasSelected);
+					}
+					$("#perfilespersonasinstitucion-id_perfiles_x_persona").trigger("chosen:updated");
 				},
 		"json");
 		

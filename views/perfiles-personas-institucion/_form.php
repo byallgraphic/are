@@ -10,6 +10,9 @@ else
 	die;
 }
 
+use nex\chosen\Chosen;
+
+
 /**********
 Versión: 001
 Fecha: 25-04-2018
@@ -35,12 +38,38 @@ use yii\widgets\ActiveForm;
 <div class="perfiles-personas-institucion-form">
 
     <?php $form = ActiveForm::begin(); ?>
+	
+	<?= $form->field($model, "id_institucion")->widget(
+						Chosen::className(), [
+							'items' => $instituciones,
+							'disableSearch' => 5, // Search input will be disabled while there are fewer than 5 items
+							'multiple' => false,
+							'clientOptions' => [
+								'search_contains' => true,
+								'single_backstroke_delete' => false,
+							],
+                            'placeholder' => 'Seleccione Institución',
+					])?>
 
-    <?= $form->field($model, 'id_institucion')->dropDownList($instituciones,['prompt' => 'Seleccione...',]) ?>
+	
+	
 	
 	<?= $form->field($perfilesTable, 'id')->dropDownList($perfiles,['prompt' => 'Seleccione...','id' =>'selPerfiles','options' => [$perfilesSelected[0]['id'] => ['selected' => 'selected']]])->label("Perfil") ?>
 	
-	<?= $form->field($model, 'id_perfiles_x_persona')->dropDownList(['prompt' => 'Seleccione...']) ?>
+
+	
+	
+	<?= $form->field($model, "id_perfiles_x_persona")->widget(
+						Chosen::className(), [
+							'items' => [],
+							'disableSearch' => 5, // Search input will be disabled while there are fewer than 5 items
+							'multiple' => false,
+							'clientOptions' => [
+								'search_contains' => true,
+								'single_backstroke_delete' => false,
+							],
+                            'placeholder' => 'Seleccione Institución',
+					])?>
 	
 	<?= $form->field($model, 'observaciones')->textarea(['rows' => '6']) ?>
 
