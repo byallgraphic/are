@@ -135,9 +135,7 @@ class SSP {
 				}
 			}
 
-			if ( count( $orderBy ) ) {
-				$order = 'ORDER BY '.implode(', ', $orderBy);
-			}
+			$order = 'ORDER BY '.implode(', ', $orderBy);
 		}
 
 		return $order;

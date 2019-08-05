@@ -41,7 +41,9 @@ $this->params['breadcrumbs'][] = $this->title;
     <?= DataTables::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+	
 		'clientOptions' => [
+			'pageSize' => 10,
 		'language'=>[
                 'url' => '//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json',
             ],
@@ -99,7 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
 					");
 					$result = $command->queryAll();
 								
-					return $result[0]['nombres'];
+					return @$result[0]['nombres'];
 				},
 				
 			], 

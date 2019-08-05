@@ -40,22 +40,20 @@ class Cookie
     protected $secure;
     protected $httponly;
     protected $rawValue;
-    private $samesite;
 
     /**
      * Sets a cookie.
      *
-     * @param string      $name         The cookie name
-     * @param string      $value        The value of the cookie
-     * @param string|null $expires      The time the cookie expires
-     * @param string|null $path         The path on the server in which the cookie will be available on
-     * @param string      $domain       The domain that the cookie is available
-     * @param bool        $secure       Indicates that the cookie should only be transmitted over a secure HTTPS connection from the client
-     * @param bool        $httponly     The cookie httponly flag
-     * @param bool        $encodedValue Whether the value is encoded or not
-     * @param string|null $samesite     The cookie samesite attribute
+     * @param string $name         The cookie name
+     * @param string $value        The value of the cookie
+     * @param string $expires      The time the cookie expires
+     * @param string $path         The path on the server in which the cookie will be available on
+     * @param string $domain       The domain that the cookie is available
+     * @param bool   $secure       Indicates that the cookie should only be transmitted over a secure HTTPS connection from the client
+     * @param bool   $httponly     The cookie httponly flag
+     * @param bool   $encodedValue Whether the value is encoded or not
      */
-    public function __construct(string $name, ?string $value, string $expires = null, string $path = null, string $domain = '', bool $secure = false, bool $httponly = true, bool $encodedValue = false, string $samesite = null)
+    public function __construct(string $name, ?string $value, string $expires = null, string $path = null, string $domain = '', bool $secure = false, bool $httponly = true, bool $encodedValue = false)
     {
         if ($encodedValue) {
             $this->value = urldecode($value);
@@ -69,7 +67,6 @@ class Cookie
         $this->domain = $domain;
         $this->secure = $secure;
         $this->httponly = $httponly;
-        $this->samesite = $samesite;
 
         if (null !== $expires) {
             $timestampAsDateTime = \DateTime::createFromFormat('U', $expires);
@@ -109,18 +106,14 @@ class Cookie
             $cookie .= '; httponly';
         }
 
-        if (null !== $this->samesite) {
-            $cookie .= '; samesite='.$this->samesite;
-        }
-
         return $cookie;
     }
 
     /**
      * Creates a Cookie instance from a Set-Cookie header value.
      *
-     * @param string      $cookie A Set-Cookie header value
-     * @param string|null $url    The base URL
+     * @param string $cookie A Set-Cookie header value
+     * @param string $url    The base URL
      *
      * @return static
      *
@@ -145,7 +138,6 @@ class Cookie
             'secure' => false,
             'httponly' => false,
             'passedRawValue' => true,
-            'samesite' => null,
         );
 
         if (null !== $url) {
@@ -177,7 +169,7 @@ class Cookie
                 continue;
             }
 
-            if (2 === \count($elements = explode('=', $part, 2))) {
+            if (2 === count($elements = explode('=', $part, 2))) {
                 if ('expires' === strtolower($elements[0])) {
                     $elements[1] = self::parseDate($elements[1]);
                 }
@@ -194,15 +186,14 @@ class Cookie
             $values['domain'],
             $values['secure'],
             $values['httponly'],
-            $values['passedRawValue'],
-            $values['samesite']
+            $values['passedRawValue']
         );
     }
 
     private static function parseDate($dateValue)
     {
         // trim single quotes around date if present
-        if (($length = \strlen($dateValue)) > 1 && "'" === $dateValue[0] && "'" === $dateValue[$length - 1]) {
+        if (($length = strlen($dateValue)) > 1 && "'" === $dateValue[0] && "'" === $dateValue[$length - 1]) {
             $dateValue = substr($dateValue, 1, -1);
         }
 
@@ -251,7 +242,7 @@ class Cookie
     /**
      * Gets the expires time of the cookie.
      *
-     * @return string|null The cookie expires time
+     * @return string The cookie expires time
      */
     public function getExpiresTime()
     {
@@ -306,15 +297,5 @@ class Cookie
     public function isExpired()
     {
         return null !== $this->expires && 0 != $this->expires && $this->expires < time();
-    }
-
-    /**
-     * Gets the samesite attribute of the cookie.
-     *
-     * @return string|null The cookie samesite attribute
-     */
-    public function getSameSite(): ?string
-    {
-        return $this->samesite;
     }
 }

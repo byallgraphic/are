@@ -1,11 +1,6 @@
 CHANGELOG
 =========
 
-4.2.0
------
-
- * added support for multiple files or directories in `LintCommand`
-
 4.0.0
 -----
 
