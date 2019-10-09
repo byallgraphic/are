@@ -124,7 +124,7 @@ class PersonasController extends Controller
     {
         $searchModel = new PersonasBuscar();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-		$dataProvider ->query->andWhere('estado=1'); 
+		$dataProvider ->query->andWhere('estado=1');
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -220,11 +220,12 @@ class PersonasController extends Controller
 			//variable con la conexion a la base y traer id sede
 			$connection = Yii::$app->getDb();
 			
-			foreach($idPerfiles as $perfilesPersonas)
-			{
-				$arrayPerfiles[]="($model->id, $perfilesPersonas,1)";
-		
-			}
+			if( is_array($idPerfiles) ){
+			
+				foreach($idPerfiles as $perfilesPersonas)
+				{
+					$arrayPerfiles[]="($model->id, $perfilesPersonas,1)";
+				}
 					
 					/**
 					* Se inserta en perfiles por personas
@@ -235,6 +236,7 @@ class PersonasController extends Controller
 															VALUES".implode(",",$arrayPerfiles)."");
 															
 					$result = $command->queryAll();
+			}
 		
 			
 		

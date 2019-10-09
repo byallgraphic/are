@@ -182,6 +182,8 @@ class GruposSoporteController extends Controller
 												and pe.estado=1
 												and pp.id= d.id_perfiles_x_personas");
 		$result = $command->queryAll();
+		
+		$docentes = [];
 		//se formatea para que lo reconozca el select
 		foreach($result as $key){
 			$docentes[$key['id']]=$key['nombres'];
