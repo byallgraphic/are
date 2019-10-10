@@ -10,7 +10,7 @@ return [
 
 
 	'class' 	=> 'yii\db\Connection',
-	'dsn' 		=> 'pgsql:host=localhost;port=5432;dbname=sga_aprender5',
+	'dsn' 		=> 'pgsql:host=localhost;port=5432;dbname=are',
 	'username' 	=> 'postgres',
 	'password' 	=> '123456',
 	'charset' 	=> 'utf8',
