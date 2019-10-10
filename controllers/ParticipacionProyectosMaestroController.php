@@ -39,6 +39,7 @@ use app\models\Perfiles;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
+
 /**
  * ParticipacionProyectosMaestroController implements the CRUD actions for ParticipacionProyectosMaestro model.
  */
@@ -130,11 +131,13 @@ class ParticipacionProyectosMaestroController extends Controller
     {
         $model = new ParticipacionProyectosMaestro();
 		
+		
 		$sedesTable 		= new Sedes();
 		$dataSedes	 		= $sedesTable->find()->where( 'id='.$idSedes )->andWhere( 'estado=1' )->one();
 		$sedes				= ArrayHelper::map( $dataSedes, 'id', 'descripcion' );
 		// var_dump( $dataSedes->id_instituciones );
 		// exit();
+		
 		$institucionesTable	= new Instituciones();
 		$dataInstituciones	= $institucionesTable->find()->where( 'id='.$dataSedes->id_instituciones )->andWhere( 'estado=1' )->all();
 		$instituciones		= ArrayHelper::map( $dataInstituciones, 'id', 'descripcion' );
@@ -144,23 +147,22 @@ class ParticipacionProyectosMaestroController extends Controller
 		$estados			= ArrayHelper::map( $dataEstados, 'id', 'descripcion' );
 		
 		$personasTable 		= new Personas();
-		$dataPersonas 		= $personasTable->find()
-								->select( ( "personas.id, ( personas.nombres || ' ' || personas.apellidos ) nombres" ) )
-								->innerJoin( 'perfiles_x_personas pp', 'pp.id_personas=personas.id'  )
-								->innerJoin( 'perfiles_x_personas_institucion ppi', 'ppi.id_institucion='.$dataSedes->id_instituciones )
-								->where( 'pp.estado=1' )
-								->andWhere( 'personas.estado=1' )
-								->andWhere( 'ppi.estado=1' )
-								->all();
-		$personas			= ArrayHelper::map( $dataPersonas, 'id', 'nombres' );
+		//se pasa a otra accion
+		// $dataPersonas 		= $personasTable->find()
+								// ->select( ( "personas.id, ( personas.nombres || ' ' || personas.apellidos ) nombres" ) )
+								// ->innerJoin( 'perfiles_x_personas pp', 'pp.id_personas=personas.id'  )
+								// ->innerJoin( 'perfiles_x_personas_institucion ppi', 'ppi.id_institucion='.$dataSedes->id_instituciones )
+								// ->where( 'pp.estado=1' )
+								// ->andWhere( 'personas.estado=1' )
+								// ->andWhere( 'ppi.estado=1' )
+								// ->all();
+		// $personas			= ArrayHelper::map( $dataPersonas, 'id', 'nombres' );
+		$personas			=[];;
 		
-		$dataNombresProyectos	= NombresProyectosParticipacion::find()
-									->innerJoin( 'tipos_participacion tp', 'tp.id=tipo' )
-									->where( 'nombres_proyectos_participacion.estado=1' )
-									->andWhere( 'tipo=1' )
-									->andWhere( 'tp.estado=1' )
-									->all();
-		$nombresProyectos 	  	= ArrayHelper::map( $dataNombresProyectos, 'id', 'descripcion' );
+		$nombresProyectos = new NombresProyectosParticipacion();
+		$nombresProyectos = $nombresProyectos->find()->orderby("id")->all();
+		$nombresProyectos = ArrayHelper::map($nombresProyectos,'id','descripcion');
+		
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect([
@@ -226,13 +228,9 @@ class ParticipacionProyectosMaestroController extends Controller
 								->all();
 		$perfiles 	  		= ArrayHelper::map( $dataPerfiles, 'id', 'descripcion' );
 		
-		$dataNombresProyectos	= NombresProyectosParticipacion::find()
-									->innerJoin( 'tipos_participacion tp', 'tp.id=tipo' )
-									->where( 'nombres_proyectos_participacion.estado=1' )
-									->andWhere( 'tipo=1' )
-									->andWhere( 'tp.estado=1' )
-									->all();
-		$nombresProyectos 	  	= ArrayHelper::map( $dataNombresProyectos, 'id', 'descripcion' );
+		$nombresProyectos = new NombresProyectosParticipacion();
+		$nombresProyectos = $nombresProyectos->find()->orderby("id")->all();
+		$nombresProyectos = ArrayHelper::map($nombresProyectos,'id','descripcion');
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect([
@@ -291,4 +289,28 @@ class ParticipacionProyectosMaestroController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+	
+	/*
+	* Se busca un docente 
+	*/
+	public function actionDocentes($filtro){
+		$personasData= Personas::find()
+							->select( "personas.id, ( nombres || apellidos ) as nombres" )
+							->innerJoin( "perfiles_x_personas pp", "pp.id_personas=personas.id" )
+							->andWhere('personas.estado=1')
+							->andWhere( "pp.estado=1" )
+							->andWhere( "pp.id_perfiles=10" )
+							->andWhere(
+							['or',
+								['ILIKE', 'personas.nombres', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.apellidos', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.identificacion', '%'. $filtro . '%', false]
+							])
+							->orderby('personas.id')
+							->all();
+		$personas		= ArrayHelper::map( $personasData, 'id', 'nombres' );
+			
+		
+		return json_encode($personas);
+	}
 }

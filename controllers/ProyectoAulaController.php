@@ -81,6 +81,7 @@ class ProyectoAulaController extends Controller
 		
 		$sede		= Sedes::findOne( $idSede );
 		
+		//se pasa a una accion
 		$personasData= Personas::find()
 							->select( "personas.id, ( nombres || apellidos ) as nombres" )
 							->innerJoin( "perfiles_x_personas pp", "pp.id_personas=personas.id" )
@@ -176,6 +177,7 @@ class ProyectoAulaController extends Controller
 		
 		$sede		= Sedes::findOne( $idSede );
 		
+		//se paso a otra accion
 		$personasData= Personas::find()
 							->select( "personas.id, ( nombres || apellidos ) as nombres" )
 							->innerJoin( "perfiles_x_personas pp", "pp.id_personas=personas.id" )
@@ -258,4 +260,28 @@ class ProyectoAulaController extends Controller
 
         throw new NotFoundHttpException('The requested page does not exist.');
     }
+	
+	/*
+	* Se busca un docente 
+	*/
+	public function actionDocentes($filtro){
+		$personasData= Personas::find()
+							->select( "personas.id, ( nombres || apellidos ) as nombres" )
+							->innerJoin( "perfiles_x_personas pp", "pp.id_personas=personas.id" )
+							->andWhere('personas.estado=1')
+							->andWhere( "pp.estado=1" )
+							->andWhere( "pp.id_perfiles=10" )
+							->andWhere(
+							['or',
+								['ILIKE', 'personas.nombres', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.apellidos', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.identificacion', '%'. $filtro . '%', false]
+							])
+							->orderby('personas.id')
+							->all();
+		$personas		= ArrayHelper::map( $personasData, 'id', 'nombres' );
+			
+		
+		return json_encode($personas);
+	}
 }

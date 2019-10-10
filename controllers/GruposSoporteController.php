@@ -39,6 +39,7 @@ use app\models\Estados;
 use yii\helpers\ArrayHelper;
 use app\models\Sedes;
 use app\models\SedesJornadas;
+use app\models\Personas;
 
 
 
@@ -172,7 +173,7 @@ class GruposSoporteController extends Controller
 		* Concexion a la db, llenar select de docentes
 		*/
 		
-		
+		//se pasa a otra accion
 		$command = $connection->createCommand("select d.id_perfiles_x_personas as id, concat(p.nombres,' ',p.apellidos) as nombres
 												from personas as p, perfiles_x_personas as pp, docentes as d, perfiles as pe
 												where p.id= pp.id_personas
@@ -360,6 +361,30 @@ class GruposSoporteController extends Controller
 		'idInstitucion' =>$idInstitucion,
 		] );
 
+	}
+	
+	/*
+	* Se busca un docente 
+	*/
+	public function actionDocentes($filtro){
+		$personasData= Personas::find()
+							->select( "personas.id, ( nombres || apellidos ) as nombres" )
+							->innerJoin( "perfiles_x_personas pp", "pp.id_personas=personas.id" )
+							->andWhere('personas.estado=1')
+							->andWhere( "pp.estado=1" )
+							->andWhere( "pp.id_perfiles=10" )
+							->andWhere(
+							['or',
+								['ILIKE', 'personas.nombres', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.apellidos', '%'. $filtro . '%', false],
+								['ILIKE', 'personas.identificacion', '%'. $filtro . '%', false]
+							])
+							->orderby('personas.id')
+							->all();
+		$personas		= ArrayHelper::map( $personasData, 'id', 'nombres' );
+			
+		
+		return json_encode($personas);
 	}
 	
 	

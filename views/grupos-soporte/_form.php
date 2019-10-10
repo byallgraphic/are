@@ -20,10 +20,53 @@ Descripción: Formulario grupos soporte
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
+use nex\chosen\Chosen;
 
 /* @var $this yii\web\View */
 /* @var $model app\models\GruposSoporte */
 /* @var $form yii\widgets\ActiveForm */
+
+$this->registerJs( "
+
+	$( document ).ready(function() 
+	{
+		//informacion de tercero 
+		$('#grupossoporte_id_docentes_chosen').on( 'keydown', function(event) {
+				if(event.which == 13)
+				{
+					
+					var info ='';
+					filtro = $(this).children('div').children().children().val();
+					$.get( 'index.php?r=grupos-soporte/docentes&filtro='+filtro,
+					function( data )
+					{
+						$.each(data, function( index, datos) 
+							{	
+								info = info + '<option value='+index+'>'+datos+'</option>';
+								
+							});
+							
+						select = $('#grupossoporte-id_docentes');	
+						select.html('');
+						select.trigger('chosen:updated');
+						
+						select.append(info);
+						select.trigger('chosen:updated');
+						
+						
+					},'json'
+						);
+						
+						
+				}
+		});
+		
+
+
+		
+	});
+		
+");
 
 ?>
 
@@ -45,7 +88,19 @@ use dosamigos\datepicker\DatePicker;
 
     <?= $form->field($model, 'cantidad_participantes')->textInput() ?>
 
-    <?= $form->field($model, 'id_docentes')->dropDownList($docentes, ['prompt'=>'Seleccione...']) ?>
+	<?= $form->field($model, "id_docentes")->widget(
+						Chosen::className(), [
+							'items' => [],
+							'disableSearch' => 0, // Search input will be disabled while there are fewer than 5 items
+							'multiple' => false,
+							'clientOptions' => [
+								'search_contains' => true,
+								'single_backstroke_delete' => false,
+							],
+                            'placeholder' => 'Seleccione un docente',
+							'noResultsText' => "Enter para buscar",
+					])?>
+
 
     <?= $form->field($model, 'observaciones')->textarea(['rows' => '6']) ?>
 
