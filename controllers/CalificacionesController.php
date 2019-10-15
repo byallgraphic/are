@@ -192,7 +192,7 @@ class CalificacionesController extends Controller
             $docente[] = "<option value='$id'>$nombres</option>";
         }
 
-        echo json_encode($docente);
+        return json_encode($docente);
         // return Json::encode( $algo);
     }
 
@@ -269,7 +269,7 @@ class CalificacionesController extends Controller
         }
 
 
-        echo json_encode($docente);
+        return json_encode($docente);
         // return Json::encode( $algo);
     }
 
@@ -539,7 +539,7 @@ class CalificacionesController extends Controller
         // $data.="</tr>";
 
 
-        echo json_encode($data);
+        return json_encode($data);
     }
 
 
