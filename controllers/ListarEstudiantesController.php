@@ -1,5 +1,16 @@
 <?php
 
+/**********
+Versión: 001
+---------------------------------------
+Modificaciones
+Fecha: 2019-10-15
+Desarrollador: Edwin Molina Grisales
+Descripción: se definen la variable jornada
+---------------------------------------
+**********/
+
+
 namespace app\controllers;
 
 if(@$_SESSION['sesion']=="si")
@@ -214,6 +225,7 @@ class ListarEstudiantesController extends Controller
 				");
 			$result = $command->queryAll();
 			
+			$jornadas = [];
 			foreach ($result as $r)
 			{
 				$jornadas[$r['id']]=$r['descripcion'];
