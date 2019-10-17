@@ -33,6 +33,8 @@ $( document ).ready(function() {
 
     // $( tds[ 6 ] ).val( Math.round( 100*sum )/100 );
     // });
+	
+	$( "#selDocentes" ).chosen();
 
     llenarComboDocentes();
 
@@ -185,7 +187,7 @@ $( ".content a" ).click(function(){
 
         var table = $( ".content table" ).eq( $( ".content table" ).length-1 );
 
-        var estudiantes = $( "tbody > tr", table );
+        var estudiantes = $( "tbody > tr[estudiante]", table );
 
         //Obtenendo los codigos del desempño
         var codigosDesempeno = $( "thead > tr", table ).eq(3);
@@ -199,7 +201,7 @@ $( ".content a" ).click(function(){
             var inCalificaciones = $( "input:text:lt(6)", this );
             var inIds			 = $( "input:hidden:lt(7)", this );
 
-
+console.log(inCalificaciones)
             inCalificaciones.each(function(y){
 
                 data.push({
@@ -225,9 +227,13 @@ $( ".content a" ).click(function(){
 
             observaciones = [];
             id_estudiante = v.className.substr(-1);
+            
+			id_estudiante = v.className.split("_");
+			
+			id_estudiante = id_estudiante[ id_estudiante.length-1 ];
 
             observaciones.push({
-                id_estudiante	: id_estudiante,
+                id_estudiante		: id_estudiante,
                 observacion_conocer	: $( ".observaciones_0_" + id_estudiante ).val(),
                 observacion_hacer	: $( ".observaciones_1_" + id_estudiante ).val(),
                 observacion_saber	: $( ".observaciones_2_" + id_estudiante ).val()
@@ -238,7 +244,7 @@ $( ".content a" ).click(function(){
 
         console.log(myObject);
 
-
+console.log(data)
 
         // return;
         $.post(
@@ -289,6 +295,9 @@ function llenarComboDocentes()
         function( data )
         {
             $("#selDocentes").html(data);
+			
+			$("#selDocentes").trigger('chosen:updated');
+			// .trigger( 'chosen:updated' );
         },
         "json");
 
@@ -856,6 +865,7 @@ function generatePdf(id_estudiante) {
     //console.log(data);
 
     $.post( "index.php?r=calificaciones/generate-pdf", data, function( data ) {
+		console.log(data)
         window.open(data, 'Download');
         //window.location.assign('prueba.pdf');
         $( ".result" ).html( data );

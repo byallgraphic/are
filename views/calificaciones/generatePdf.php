@@ -55,15 +55,17 @@
                     <tbody>
                     <?php foreach ($asignaturas AS $key => $materia): ?>
                         <?php $nombreM = \app\models\Asignaturas::findOne($materia->id_asignatura); ?>
+                        <?php $periodo = \app\models\Periodos::findOne($materia["id_periodo"]); ?>
                         <tr>
                             <td>
-                                <?= $nombreM->descripcion.' Periodo '.$materia["id_periodo"] ?>
+                                <?= $nombreM->descripcion.' '.$periodo->descripcion ?>
                                 <br>
                                 Doncente de asignatura: <?= $docente ?>
 
                             </td>
                             <td><!--FA: 2 -- IHS: 4 -- 3.0 - Basico--></td>
                         </tr>
+                        <?php if( empty( $observacion_calificacion[$nombreM->descripcion] ) ) continue; ?>
                         <tr>
                             <td colspan = 3>Saber Conocer</td>
                             <td><?= $observacion_calificacion[$nombreM->descripcion][$materia["id_periodo"]][0]?></td>

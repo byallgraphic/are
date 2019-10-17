@@ -14,6 +14,8 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 
+use nex\chosen\Chosen;
+
 use app\models\Personas;
 
 $this->registerJsFile("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js");
@@ -104,7 +106,21 @@ $this->params['breadcrumbs'][] = $this->title;
 		
 			<tr>
 				<td>
-					 <?php echo  $form->field( $searchModel, 'observaciones' )->dropDownList( [], [ 'prompt' => 'Seleccione...' ,'id'=>'selDocentes'] )->label( 'Docente' ) ?>
+					 <?php echo $form->field( $searchModel, 'observaciones' )->dropDownList( [], [ 'prompt' => 'Seleccione...' ,'id'=>'selDocentes'] )->label( 'Docente' ) ?>
+					 <div style='display:none;'>
+						 <?= $form->field($searchModel, 'observaciones')->widget(
+								Chosen::className(), [
+									'id'	=> 'selDocentes',
+									'items' => [],
+									'disableSearch' => 5, // Search input will be disabled while there are fewer than 5 items
+									'multiple' => false,
+									'clientOptions' => [
+										'search_contains' => true,
+										'single_backstroke_delete' => false,
+									],
+									'placeholder' => 'Seleccione algunas opciones',
+							]); ?>
+					 </div>
 				</td>
 				
 				<td>

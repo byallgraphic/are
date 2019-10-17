@@ -4,6 +4,10 @@ Versión: 001
 Fecha: 04-04-2018
 ---------------------------------------
 Modificaciones:
+Fecha: 16-10-2019
+Persona encargada: Edwin Molina Grisales
+Se hacen cambios varios para guardar la información y generar pdf
+---------------------------------------
 Fecha: 09-07-2018
 Persona encargada: Edwin Molina Grisales
 Se consulta las faltas del estudiante y se asocia el perido a las califiaciones
@@ -627,31 +631,34 @@ class CalificacionesController extends Controller
         }
 
 
-        foreach ($observaciones as $observacion_data){
-            $observacion = ObservacionesCalificaciones::find()->where([
-                    'id_estudiante' => $observacion_data["id_estudiante"],
-                    'id_asignatura' => $data[0]['id_asignatura'],
-                    'id_periodo' => $data[0]['id_periodo']
-                ]
-            )->one();
+		if( !empty($observaciones) > 0 ){
+			
+			foreach ($observaciones as $observacion_data){
+				$observacion = ObservacionesCalificaciones::find()->where([
+						'id_estudiante' => $observacion_data["id_estudiante"],
+						'id_asignatura' => $data[0]['id_asignatura'],
+						'id_periodo' => $data[0]['id_periodo']
+					]
+				)->one();
 
-            if (is_null($observacion)){
-                $observacion = new ObservacionesCalificaciones();
-            }
+				if (is_null($observacion)){
+					$observacion = new ObservacionesCalificaciones();
+				}
 
-            $observacion->id_estudiante = $observacion_data["id_estudiante"];
-            $observacion->id_jornada = $data[0]['id_sede_jornada'];
-            $observacion->id_paralelo = $data[0]['id_paralelo'];
-            $observacion->id_asignatura = $data[0]['id_asignatura'];
-            $observacion->id_periodo = $data[0]['id_periodo'];
-            $observacion->observacion_conocer = $observacion_data['observacion_conocer'];
-            $observacion->observacion_hacer = $observacion_data['observacion_hacer'];
-            $observacion->observacion_saber = $observacion_data['observacion_saber'];
+				$observacion->id_estudiante = $observacion_data["id_estudiante"];
+				$observacion->id_jornada = $data[0]['id_sede_jornada'];
+				$observacion->id_paralelo = $data[0]['id_paralelo'];
+				$observacion->id_asignatura = $data[0]['id_asignatura'];
+				$observacion->id_periodo = $data[0]['id_periodo'];
+				$observacion->observacion_conocer = $observacion_data['observacion_conocer'];
+				$observacion->observacion_hacer = $observacion_data['observacion_hacer'];
+				$observacion->observacion_saber = $observacion_data['observacion_saber'];
 
-            if ($observacion->observacion_conocer != '' || $observacion->observacion_hacer != '' || $observacion->observacion_saber){
-                $observacion->save();
-            }
-        }
+				if ($observacion->observacion_conocer != '' || $observacion->observacion_hacer != '' || $observacion->observacion_saber){
+					$observacion->save();
+				}
+			}
+		}
 
         return json_encode( $val );
     }
@@ -797,8 +804,9 @@ class CalificacionesController extends Controller
             $estudiante = Personas::findOne($perfilxpersona->id_personas);
 
             $paralelo = Paralelos::findOne($idParalelo);
-            $docente = Docentes::findOne($idDocente);
-            $docente = Personas::findOne($docente->id_perfiles_x_personas);
+            // $docente = Docentes::findOne($idDocente);
+            $docente = PerfilesXPersonas::findOne($idDocente);
+            $docente = Personas::findOne($docente->id_personas);
 
             unset($idsAsignaturas[0]);
             $result_array = "";
@@ -856,7 +864,7 @@ class CalificacionesController extends Controller
                   GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno
                  ORDER BY indicador_desempeno");
 
-            $observacion_calificacion = $connection->createCommand("SELECT 
+			$observacion_calificacion = $connection->createCommand("SELECT 
                   personas.nombres || ' ' || personas.apellidos AS nombre,
                   calificaciones.calificacion AS calificacion,
                   calificaciones.id_periodo AS periodo,
@@ -887,11 +895,11 @@ class CalificacionesController extends Controller
                     $materia = $obj_calificacion["materia"];
                 }
 
-                if ($obj_calificacion["periodo"] == 1){
+                if ($obj_calificacion["periodo"] == 8){
                     $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
                     $key_periodo_1++;
                 }
-                if ($obj_calificacion["periodo"] == 2){
+                if ($obj_calificacion["periodo"] == 9){
                     $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
                     $key_periodo_2++;
                 }
@@ -906,7 +914,7 @@ class CalificacionesController extends Controller
                 $indicadores++;
             }
 
-            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'C:/xampp/htdocs/are/web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
+            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'D:/xampp/htdocs/yii/are/web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
             $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
 
