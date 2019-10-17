@@ -584,7 +584,7 @@ class CalificacionesController extends Controller
      * @throws \Mpdf\MpdfException
      */
     public function actionCreate()
-    {
+    { 
         // var_dump( Yii::$app->request->post('data') );
         $data	=  Yii::$app->request->post('data');
         $observaciones =  Yii::$app->request->post('observacion');
@@ -906,15 +906,24 @@ class CalificacionesController extends Controller
             }
 
             $calificacion_periodos = [];
-            $calificacion_final = 0;
-            $indicadores = 1;
+            $definitiva = 0;
+            $indicadores = [65 => 0.3, 66=>0.4, 67=>0.3, 68=>0.1,69=>0.1,70=>0.1];
+			
             foreach ($calificaciones->queryAll() as $key => $calificacion){
-                $definitiva = $calificacion_final += $calificacion["calificacion"];
-                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva/$indicadores;
-                $indicadores++;
+				
+				$porcentaje = $indicadores[ $calificacion['indicador_desempeno'] ];
+                $definitiva += $calificacion["calificacion"] * $porcentaje; 
+				
+				if($key ==  2 )
+				{
+					$definitiva *= 0.7;
+				}
+
+                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva;
+               
             }
 
-            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO 'D:/xampp/htdocs/yii/are/web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
+            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO '" . __DIR__ . "/../web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
             $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
 

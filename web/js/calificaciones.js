@@ -96,8 +96,9 @@ function notaFinal(obj)
     sum += tds.eq(3).val()*0.1;
     sum += tds.eq(4).val()*0.1;
     sum += tds.eq(5).val()*0.1;
+	
 
-    $( tds[ 6 ] ).val( Math.round( 100*sum )/100 );
+    $( tds[ 6 ] ).val( Math.round( 100*sum )/100 );  
 }
 
 
