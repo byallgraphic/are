@@ -922,7 +922,7 @@ class CalificacionesController extends Controller
                
             }
 
-            Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO '" . __DIR__ . "/../web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
+     //       Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO '" . __DIR__ . "/../web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
             $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
 
