@@ -849,7 +849,8 @@ class CalificacionesController extends Controller
                   avg(\"public\".calificaciones.calificacion) AS calificacion,
                   \"public\".calificaciones.id_periodo,
                   \"public\".calificaciones.id_distribuciones_x_indicador_desempeno AS indicador_desempeno,
-                  \"public\".asignaturas.descripcion AS materia
+                  \"public\".asignaturas.descripcion AS materia,
+                  \"public\".indicador_desempeno.codigo AS porcentaje
                 FROM (((((((((calificaciones
                   JOIN estudiantes ON ((calificaciones.id_perfiles_x_personas_estudiantes = estudiantes.id_perfiles_x_personas)))
                   JOIN perfiles_x_personas ON ((estudiantes.id_perfiles_x_personas = perfiles_x_personas.id)))
@@ -861,57 +862,64 @@ class CalificacionesController extends Controller
                   JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
                   JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
                   WHERE estudiantes.id_perfiles_x_personas = $perfilxpersona->id
-                  GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno
+                  GROUP BY materia, nombre, \"public\".calificaciones.id_periodo, calificaciones.id_distribuciones_x_indicador_desempeno,\"public\".indicador_desempeno.codigo
                  ORDER BY indicador_desempeno");
 
-			$observacion_calificacion = $connection->createCommand("SELECT 
-                  personas.nombres || ' ' || personas.apellidos AS nombre,
-                  calificaciones.calificacion AS calificacion,
-                  calificaciones.id_periodo AS periodo,
-                  calificaciones.id_distribuciones_x_indicador_desempeno AS indicador_desempeno,
-                  asignaturas.descripcion AS materia
-                FROM (((((((((calificaciones
-                  JOIN estudiantes ON ((calificaciones.id_perfiles_x_personas_estudiantes = estudiantes.id_perfiles_x_personas)))
-                  JOIN perfiles_x_personas ON ((estudiantes.id_perfiles_x_personas = perfiles_x_personas.id)))
-                  JOIN personas ON ((perfiles_x_personas.id_personas = personas.id)))
-                  JOIN distribuciones_x_indicador_desempeno ON ((calificaciones.id_distribuciones_x_indicador_desempeno = distribuciones_x_indicador_desempeno.id)))
-                  JOIN indicador_desempeno ON ((distribuciones_x_indicador_desempeno.id_indicador_desempeno = indicador_desempeno.id)))
-                  JOIN distribuciones_academicas ON ((distribuciones_x_indicador_desempeno.id_distribuciones = distribuciones_academicas.id)))
-                  JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
-                  JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
-                  JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
-									WHERE estudiantes.id_perfiles_x_personas = $perfilxpersona->id
-                  GROUP BY materia, nombre, calificaciones.id_periodo,calificaciones.calificacion, indicador_desempeno
-                 ORDER BY indicador_desempeno");
+			// $observacion_calificacion = $connection->createCommand("SELECT 
+                  // personas.nombres || ' ' || personas.apellidos AS nombre,
+                  // calificaciones.calificacion AS calificacion,
+                  // calificaciones.id_periodo AS periodo,
+                  // calificaciones.id_distribuciones_x_indicador_desempeno AS indicador_desempeno,
+                  // asignaturas.descripcion AS materia
+                // FROM (((((((((calificaciones
+                  // JOIN estudiantes ON ((calificaciones.id_perfiles_x_personas_estudiantes = estudiantes.id_perfiles_x_personas)))
+                  // JOIN perfiles_x_personas ON ((estudiantes.id_perfiles_x_personas = perfiles_x_personas.id)))
+                  // JOIN personas ON ((perfiles_x_personas.id_personas = personas.id)))
+                  // JOIN distribuciones_x_indicador_desempeno ON ((calificaciones.id_distribuciones_x_indicador_desempeno = distribuciones_x_indicador_desempeno.id)))
+                  // JOIN indicador_desempeno ON ((distribuciones_x_indicador_desempeno.id_indicador_desempeno = indicador_desempeno.id)))
+                  // JOIN distribuciones_academicas ON ((distribuciones_x_indicador_desempeno.id_distribuciones = distribuciones_academicas.id)))
+                  // JOIN asignaturas_x_niveles_sedes ON ((distribuciones_academicas.id_asignaturas_x_niveles_sedes = asignaturas_x_niveles_sedes.id)))
+                  // JOIN asignaturas ON ((asignaturas_x_niveles_sedes.id_asignaturas = asignaturas.id)))
+                  // JOIN observaciones_calificaciones ON (((observaciones_calificaciones.id_asignatura = asignaturas.id) AND (observaciones_calificaciones.id_estudiante = estudiantes.id_perfiles_x_personas))))
+									// WHERE estudiantes.id_perfiles_x_personas = $perfilxpersona->id
+                  // GROUP BY materia, nombre, calificaciones.id_periodo,calificaciones.calificacion, indicador_desempeno
+                 // ORDER BY indicador_desempeno");
 
             $observaciones_calificaciones = [];
             $key_periodo_1 = 0;
             $key_periodo_2 = 0;
             $materia = '';
-            foreach ($observacion_calificacion->queryAll() as $key => $obj_calificacion){
+			
+			$resultadoCalificaiones = $calificaciones->queryAll();
+            foreach ($resultadoCalificaiones as $key => $obj_calificacion){
                 if ($materia !== $obj_calificacion["materia"]){
                     $key_periodo_1 = 0;
                     $key_periodo_2 = 0;
                     $materia = $obj_calificacion["materia"];
                 }
 
-                if ($obj_calificacion["periodo"] == 8){
-                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
+                if ($obj_calificacion["id_periodo"] == 8){
+                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
                     $key_periodo_1++;
                 }
-                if ($obj_calificacion["periodo"] == 9){
-                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
+                if ($obj_calificacion["id_periodo"] == 9){
+                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
                     $key_periodo_2++;
                 }
             }
-
+	
             $calificacion_periodos = [];
             $definitiva = [];
-            $indicadores = [59 => 0.3*0.7, 60=>0.4*0.7, 61=>0.3*0.7, 62=>0.1, 63=>0.1,64=>0.1,   65 => 0.3*0.7, 66=>0.4*0.7, 67=>0.3*0.7, 68=>0.1,69=>0.1,70=>0.1];
+            // $indicadores = [59 => 0.3*0.7, 60=>0.4*0.7, 61=>0.3*0.7, 62=>0.1, 63=>0.1,64=>0.1,   65 => 0.3*0.7, 66=>0.4*0.7, 67=>0.3*0.7, 68=>0.1,69=>0.1,70=>0.1];
+			
+			// echo "<pre>"; print_r($calificaciones->queryAll()); echo "</pre>"; 
+			
+			// echo 1*"0.3 * 0.7";
+			
 			
             foreach ($calificaciones->queryAll() as $key => $calificacion){
 				
-				$porcentaje = $indicadores[ $calificacion['indicador_desempeno'] ];
+				$porcentaje =  $calificacion['porcentaje'] * 1;
 				
 				if( !isset($definitiva[$calificacion["materia"]][$calificacion['id_periodo']]) )
 					$definitiva[$calificacion["materia"]][$calificacion['id_periodo']] = 0;
@@ -921,6 +929,7 @@ class CalificacionesController extends Controller
                 $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva[$calificacion["materia"]][$calificacion['id_periodo']];
                
             }
+			
 
      //       Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO '" . __DIR__ . "/../web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
