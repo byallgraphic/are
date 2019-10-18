@@ -906,20 +906,19 @@ class CalificacionesController extends Controller
             }
 
             $calificacion_periodos = [];
-            $definitiva = 0;
-            $indicadores = [65 => 0.3, 66=>0.4, 67=>0.3, 68=>0.1,69=>0.1,70=>0.1];
+            $definitiva = [];
+            $indicadores = [59 => 0.3*0.7, 60=>0.4*0.7, 61=>0.3*0.7, 62=>0.1, 63=>0.1,64=>0.1,   65 => 0.3*0.7, 66=>0.4*0.7, 67=>0.3*0.7, 68=>0.1,69=>0.1,70=>0.1];
 			
             foreach ($calificaciones->queryAll() as $key => $calificacion){
 				
 				$porcentaje = $indicadores[ $calificacion['indicador_desempeno'] ];
-                $definitiva += $calificacion["calificacion"] * $porcentaje; 
 				
-				if($key ==  2 )
-				{
-					$definitiva *= 0.7;
-				}
+				if( !isset($definitiva[$calificacion["materia"]][$calificacion['id_periodo']]) )
+					$definitiva[$calificacion["materia"]][$calificacion['id_periodo']] = 0;
+				
+                $definitiva[$calificacion["materia"]][$calificacion['id_periodo']] += $calificacion["calificacion"] * $porcentaje; 
 
-                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva;
+                $calificacion_periodos[$calificacion["materia"]][$calificacion['id_periodo']]["calificacion"] = $definitiva[$calificacion["materia"]][$calificacion['id_periodo']];
                
             }
 
