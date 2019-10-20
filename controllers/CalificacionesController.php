@@ -886,6 +886,7 @@ class CalificacionesController extends Controller
                  // ORDER BY indicador_desempeno");
 
             $observaciones_calificaciones = [];
+            $array_key_periodo = [];
             $key_periodo_1 = 0;
             $key_periodo_2 = 0;
             $materia = '';
@@ -897,15 +898,22 @@ class CalificacionesController extends Controller
                     $key_periodo_2 = 0;
                     $materia = $obj_calificacion["materia"];
                 }
+				
+				if( empty( $array_key_periodo[$obj_calificacion["id_periodo"]] ) )
+					$array_key_periodo[$obj_calificacion["id_periodo"]] = 0;
 
-                if ($obj_calificacion["id_periodo"] == 8){
-                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
-                    $key_periodo_1++;
-                }
-                if ($obj_calificacion["id_periodo"] == 9){
-                    $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
-                    $key_periodo_2++;
-                }
+				$observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$array_key_periodo[$obj_calificacion["id_periodo"]]] = $obj_calificacion["calificacion"];
+                $array_key_periodo[$obj_calificacion["id_periodo"]]++;
+					
+                // if ($obj_calificacion["id_periodo"] == 8){
+                    // $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_1] = $obj_calificacion["calificacion"];
+                    // $key_periodo_1++;
+                // }
+                // if ($obj_calificacion["id_periodo"] == 9){
+                    // $observaciones_calificaciones[$obj_calificacion["materia"]][$obj_calificacion["id_periodo"]][$key_periodo_2] = $obj_calificacion["calificacion"];
+                    // $key_periodo_2++;
+                // }
+				
             }
 	
             $calificacion_periodos = [];
@@ -916,9 +924,9 @@ class CalificacionesController extends Controller
 			
 			// echo 1*"0.3 * 0.7";
 			
-			
+			// var_dump($calificaciones); exit();
             foreach ($calificaciones->queryAll() as $key => $calificacion){
-				
+				if( !is_numeric( $calificacion['porcentaje'] ) ) exit( print_r($calificacion) );
 				$porcentaje =  $calificacion['porcentaje'] * 1;
 				
 				if( !isset($definitiva[$calificacion["materia"]][$calificacion['id_periodo']]) )
