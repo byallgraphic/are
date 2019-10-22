@@ -650,9 +650,9 @@ class CalificacionesController extends Controller
 				$observacion->id_paralelo = $data[0]['id_paralelo'];
 				$observacion->id_asignatura = $data[0]['id_asignatura'];
 				$observacion->id_periodo = $data[0]['id_periodo'];
-				$observacion->observacion_conocer = $observacion_data['observacion_conocer'];
-				$observacion->observacion_hacer = $observacion_data['observacion_hacer'];
-				$observacion->observacion_saber = $observacion_data['observacion_saber'];
+				$observacion->observacion_conocer = $observacion_data['observacion_conocer'] ? $observacion_data['observacion_conocer']: " ";
+				$observacion->observacion_hacer = $observacion_data['observacion_hacer'] ? $observacion_data['observacion_hacer']: " ";
+				$observacion->observacion_saber = $observacion_data['observacion_saber'] ? $observacion_data['observacion_saber']: " ";
 
 				if ($observacion->observacion_conocer != '' || $observacion->observacion_hacer != '' || $observacion->observacion_saber){
 					$observacion->save();
@@ -915,7 +915,7 @@ class CalificacionesController extends Controller
                 // }
 				
             }
-	
+	// print_r($observaciones_calificaciones);
             $calificacion_periodos = [];
             $definitiva = [];
             // $indicadores = [59 => 0.3*0.7, 60=>0.4*0.7, 61=>0.3*0.7, 62=>0.1, 63=>0.1,64=>0.1,   65 => 0.3*0.7, 66=>0.4*0.7, 67=>0.3*0.7, 68=>0.1,69=>0.1,70=>0.1];
@@ -941,14 +941,15 @@ class CalificacionesController extends Controller
 
      //       Yii::$app->get('db')->createCommand("COPY (".$calificaciones->getRawSql().") TO '" . __DIR__ . "/../web/".trim($estudiante->nombres, '-').".csv' DELIMITER';' NULL '';")->queryAll();
 
-            $materiasEstObserv = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
+            $asignaturas = ObservacionesCalificaciones::find()->where('id_estudiante=:estudiante', [':estudiante'=>$perfilxpersona->id])->all();
+// print_r($asignaturas); die();
 
             $contentend = $this->renderPartial('generatePdf', [
                 'institucion' => $institucion,
                 'docente' => $docente->nombres." ".$docente->apellidos,
-                'estudiante' => $estudiante->nombres,
+                'estudiante' => $estudiante->nombres." ".$estudiante->apellidos,
                 'paralelo' => $paralelo->descripcion,
-                'asignaturas' => $materiasEstObserv,
+                'asignaturas' => $asignaturas,
                 'materia_calificacion' => $calificacion_periodos,
                 'observacion_calificacion' => $observaciones_calificaciones
             ]);
