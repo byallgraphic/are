@@ -36,6 +36,7 @@ use app\models\ObservacionesCalificaciones;
 use app\models\Paralelos;
 use app\models\PerfilesXPersonas;
 use app\models\Personas;
+use app\models\Periodos;
 use Mpdf\Mpdf;
 use Mpdf\MpdfException;
 use Mpdf\Output\Destination;
@@ -807,6 +808,12 @@ class CalificacionesController extends Controller
             // $docente = Docentes::findOne($idDocente);
             $docente = PerfilesXPersonas::findOne($idDocente);
             $docente = Personas::findOne($docente->id_personas);
+			
+			$periodos = Periodos::find()
+								->where('estado=1')
+								->andWhere('id_sedes='.$_SESSION['sede'][0])
+								->orderby('descripcion')
+								->all();
 
             unset($idsAsignaturas[0]);
             $result_array = "";
@@ -924,9 +931,23 @@ class CalificacionesController extends Controller
 			
 			// echo 1*"0.3 * 0.7";
 			
-			// var_dump($calificaciones); exit();
+			
+			$ordenarPeriodos = true;
+			
             foreach ($calificaciones->queryAll() as $key => $calificacion){
-				if( !is_numeric( $calificacion['porcentaje'] ) ) exit( print_r($calificacion) );
+				
+				if( $ordenarPeriodos ){
+					foreach( $periodos as $key => $periodo ){
+						if( !isset($definitiva[$calificacion["materia"]][ $periodo->id ]) )
+							$definitiva[$calificacion["materia"]][ $periodo->id ] = 0;
+						
+						if( !isset($calificacion_periodos[$calificacion["materia"]][ $periodo->id ]["calificacion"] ) )
+							$calificacion_periodos[$calificacion["materia"]][ $periodo->id ]["calificacion"] = 0;
+					}
+					$ordenarPeriodos = false;
+				}
+				
+				// if( !is_numeric( $calificacion['porcentaje'] ) ) exit( print_r($calificacion) );
 				$porcentaje =  $calificacion['porcentaje'] * 1;
 				
 				if( !isset($definitiva[$calificacion["materia"]][$calificacion['id_periodo']]) )
@@ -956,7 +977,7 @@ class CalificacionesController extends Controller
 
             $pdf->WriteHTML($contentend);
 
-            $pdf->Output("../web/".trim($estudiante->nombres, '-').".pdf", \Mpdf\Output\Destination::FILE);
+            $pdf->Output("../web/".trim( trim($estudiante->nombres, '-') ).".pdf", \Mpdf\Output\Destination::FILE);
 
             return trim($estudiante->nombres).".pdf";
         } catch (MpdfException $e) {
